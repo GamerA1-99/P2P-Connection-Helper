@@ -96,7 +96,7 @@ The P2P Connection Helper works by maintaining a set of pre-defined information 
 
 ## Contributing
 
-Contributions are welcome! If you have suggestions for new features, find a bug, or want to add support for another P2P client, please feel free to open an issue or submit a pull request.
+Contributions are welcome! If you have suggestions for new features, find a bug, add a another P2P Network type or want to add support for another P2P client, please feel free to open an issue or submit a pull request.
 
 When adding support for a new client, please try to include:
 *   The client's network type.
