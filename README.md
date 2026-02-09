@@ -25,11 +25,11 @@ The creator of this program is not responsible for the user's actions or the con
 *   **Automatic Detection**: Scans the Windows Registry to automatically find installed P2P clients.
 *   **Manual Management**: Manually add, edit, and remove programs, including portable applications that aren't in the registry.
 *   **Connection Fixing**: Downloads and installs updated connection files for various networks:
-    *   **eDonkey/Kadmille**: Updates `server.met` and `nodes.dat` for clients like eMule and Lphant.
+    *   **eDonkey/Kadmille**: Updates `server.met` and `nodes.dat` for clients like eDonkey2000, eMule and Lphant.
     *   **Gnutella**: Updates the `gnutella.net` host cache for clients like LimeWire, FrostWire, and Cabos.
     *   **GnuCDNA/Gnutella2**: Downloads multiple cache files (`WebCache.net`, `gnucache.net`, etc.) for clients like Morpheus, Gnucleus, and Phex.
     *   **WinMX**: Downloads the `oledlg.dll` connection patch required to connect to community servers.
-    *   **OpenNapster**: Manages `.wsx` server lists and can import `.reg` files for clients like Napigator.
+    *   **OpenNapster**: Manages `.wsx` server lists and can import `.reg` files for clients like Napster, Napigator, WinMX, Xnap and FileNavigator.
 *   **Client & Server Downloads**: A curated tab with verified links to download installers for dozens of classic P2P clients and server applications.
 *   **Link Testing**: Test the status of server list URLs and download links to ensure they are active.
 *   **Centralized Launcher**: Launch your configured P2P programs directly from the application.
