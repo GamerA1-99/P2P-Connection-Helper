@@ -55,8 +55,8 @@ This tool is pre-configured to assist clients on the following networks:
 ### For End-Users (Recommended)
 
 1.  Navigate to the **Releases** page of the GitHub repository.
-2.  Download the `P2P-Connection-Helper.exe` file from the latest .rar release.
-3.  Run the executable. All dependencies are included, and no installation is needed.
+2.  Download the `P2P-Connection-Helper.exe` file and extract it from the latest .rar release also remember to extract the folder named `Internal` .
+3.  Run the executable in the same folder as the `Internal` folder. All dependencies are included, and no installation is needed.
 
 ### For Developers (Running from Source)
 
