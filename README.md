@@ -47,7 +47,7 @@ This tool is pre-configured to assist clients on the following networks:
 
 ## Requirements
 
-*   **Operating System**: Windows (The application relies on the Windows Registry and UAC elevation).
+*   **For running from .exe**: OS: Windows 10 or 11 64-Bit (The application relies on the Windows Registry and UAC elevation).
 *   **For running from source**: Python 3.6+ and the `Pillow` library are required.
 
 ## Usage
