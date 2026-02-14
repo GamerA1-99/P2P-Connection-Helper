@@ -27,7 +27,7 @@ The creator of this program is not responsible for the user's actions or the con
 *   **Connection Fixing**: Downloads and installs updated connection files for various networks:
     *   **eDonkey/Kadmille**: Updates `server.met` and `nodes.dat` for clients like eDonkey2000, eMule and Lphant.
     *   **Gnutella**: Updates the `gnutella.net` host cache for clients like LimeWire, FrostWire, and Cabos.
-    *   **GnuCDNA/Gnutella2**: Downloads multiple cache files (`WebCache.net`, `gnucache.net`, etc.) for clients like Morpheus, Gnucleus, and Phex.
+    *   **GnuCDNA/Gnutella2**: Downloads multiple cache files (`WebCache.net`, `gnucache.net`, etc.) for clients like BearShare, Morpheus, Gnucleus, and Phex.
     *   **WinMX**: Downloads the `oledlg.dll` connection patch required to connect to community servers.
     *   **OpenNapster**: Manages `.wsx` server lists and can import `.reg` files for clients like Napster, Napigator, WinMX, Xnap and FileNavigator.
 *   **Client & Server Downloads**: A curated tab with verified links to download installers for dozens of classic P2P clients and server applications.
