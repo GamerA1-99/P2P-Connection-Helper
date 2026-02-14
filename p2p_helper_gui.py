@@ -96,7 +96,7 @@ class ToolTip:
 
 
 class P2PHelperApp(tk.Tk):
-    VERSION: str = "1.0"
+    VERSION: str = "1.1"
     DISCLAIMER_TEXT: str = (
         "This program is intended for educational purposes, fair use, and the legal sharing of content.\n\n"
         "The use of this software and any associated P2P clients for any other purpose, including the "
@@ -137,9 +137,9 @@ class P2PHelperApp(tk.Tk):
         help_menu.add_command(label="About", command=self.show_about_dialog)
 
         self.P2P_NETWORKS = {
-            "Gnutella": ["limewire", "frostwire", "wireshare", "gnutella", "bearshare", "xnap", "luckywire", "lemonwire", "turbowire", "cabos", "dexterwire"],
+            "Gnutella": ["limewire", "frostwire", "wireshare", "gnutella", "xnap", "luckywire", "lemonwire", "turbowire", "cabos", "dexterwire"],
             "eDonkey/Kadmille": ["edonkey", "emule", "amule", "edonkey2000", "lphant"],
-            "GnuCDNA/Gnutella2": ["gnucleus", "morpheus", "morpheus ultra", "mynapster", "phex", "gnutella2", "xolox", "kceasy", "neonapster"],
+            "GnuCDNA/Gnutella2": ["gnucleus", "morpheus", "morpheus ultra", "mynapster", "phex", "gnutella2", "xolox", "kceasy", "neonapster", "bearshare"],
             "OpenNapster": ["napster", "napigator", "opennap", "filenavigator", "swaptor"],
             "WinMX": ["winmx", "winmx community patch"],
             "Unknown": []  # Fallback for manually added programs
@@ -174,6 +174,7 @@ class P2PHelperApp(tk.Tk):
         self.create_widgets()
         self._create_tooltips()
         self.load_settings() # Load persistent settings on startup
+        self.show_bearshare_test_warning() # Show special warning if BearShare Test is found
         self.show_startup_disclaimer() # Show disclaimer after loading settings
 
     def create_widgets(self):
@@ -293,11 +294,19 @@ class P2PHelperApp(tk.Tk):
 
         self.download_server_list_button = ttk.Button(common_server_frame, text="Download Sources", command=self.download_server_list, state="disabled")
 
-        self.server_last_updated_label = ttk.Label(common_server_frame, text="Last Updated:")
+        self.server_last_updated_label = ttk.Label(common_server_frame, text="Last Local Update:")
         self.server_last_updated_label.grid(row=4, column=0, sticky="w", pady=3)
         self.last_updated_var = tk.StringVar(value="N/A")
         self.server_last_updated_value = ttk.Label(common_server_frame, textvariable=self.last_updated_var, font=("Segoe UI", 9, "italic"), foreground="gray")
         self.server_last_updated_value.grid(row=4, column=1, sticky="w", padx=5, pady=3)
+
+        self.server_remote_updated_label = ttk.Label(common_server_frame, text="Server Update:")
+        self.server_remote_updated_label.grid(row=5, column=0, sticky="w", pady=3)
+        self.remote_last_updated_var = tk.StringVar(value="N/A")
+        self.server_remote_updated_value = ttk.Label(common_server_frame, textvariable=self.remote_last_updated_var, font=("Segoe UI", 9, "italic"), foreground="gray")
+        self.server_remote_updated_value.grid(row=5, column=1, sticky="w", padx=5, pady=3)
+        ToolTip(self.server_remote_updated_value, lambda: "Last modification date of the file on the remote server. 'N/A' may mean the server doesn't provide this info.")
+
 
         # --- Action Buttons ---
         # Main action buttons are at the bottom of the General tab
@@ -340,11 +349,18 @@ class P2PHelperApp(tk.Tk):
         self.browse_nodes_target_button = ttk.Button(self.nodes_frame, text="...", width=3, command=lambda: self.browse_generic_target(self.nodes_list_target_var, "nodes.dat"), state="disabled")
         self.browse_nodes_target_button.grid(row=1, column=3, sticky="e")
 
-        self.nodes_last_updated_label = ttk.Label(self.nodes_frame, text="Last Updated:")
+        self.nodes_last_updated_label = ttk.Label(self.nodes_frame, text="Last Local Update:")
         self.nodes_last_updated_label.grid(row=2, column=0, sticky="w", pady=3)
         self.nodes_last_updated_var = tk.StringVar(value="N/A")
         self.nodes_last_updated_value = ttk.Label(self.nodes_frame, textvariable=self.nodes_last_updated_var, font=("Segoe UI", 9, "italic"), foreground="gray")
         self.nodes_last_updated_value.grid(row=2, column=1, sticky="w", padx=5, pady=3)
+
+        self.nodes_remote_updated_label = ttk.Label(self.nodes_frame, text="Server Update:")
+        self.nodes_remote_updated_label.grid(row=3, column=0, sticky="w", pady=3)
+        self.nodes_remote_last_updated_var = tk.StringVar(value="N/A")
+        self.nodes_remote_updated_value = ttk.Label(self.nodes_frame, textvariable=self.nodes_remote_last_updated_var, font=("Segoe UI", 9, "italic"), foreground="gray")
+        self.nodes_remote_updated_value.grid(row=3, column=1, sticky="w", padx=5, pady=3)
+        ToolTip(self.nodes_remote_updated_value, lambda: "Last modification date of the file on the remote server. 'N/A' may mean the server doesn't provide this info.")
 
         # --- WinMX Patch section, shown dynamically in Server List tab ---
         self.winmx_patch_frame = ttk.LabelFrame(server_tab, text="WinMX Connection Patch (oledlg.dll)", padding=10)
@@ -369,12 +385,18 @@ class P2PHelperApp(tk.Tk):
         self.browse_winmx_patch_target_button = ttk.Button(self.winmx_patch_frame, text="...", width=3, command=lambda: self.browse_generic_target(self.winmx_patch_target_var, "OLEDLG.DLL"), state="disabled")
         self.browse_winmx_patch_target_button.grid(row=1, column=3, sticky="e")
 
-        self.winmx_patch_last_updated_label = ttk.Label(self.winmx_patch_frame, text="Last Updated:")
+        self.winmx_patch_last_updated_label = ttk.Label(self.winmx_patch_frame, text="Last Local Update:")
         self.winmx_patch_last_updated_label.grid(row=2, column=0, sticky="w", pady=3)
         self.winmx_patch_last_updated_var = tk.StringVar(value="N/A")
         self.winmx_patch_last_updated_value = ttk.Label(self.winmx_patch_frame, textvariable=self.winmx_patch_last_updated_var, font=("Segoe UI", 9, "italic"), foreground="gray")
         self.winmx_patch_last_updated_value.grid(row=2, column=1, sticky="w", padx=5, pady=3)
 
+        self.winmx_remote_updated_label = ttk.Label(self.winmx_patch_frame, text="Server Update:")
+        self.winmx_remote_updated_label.grid(row=3, column=0, sticky="w", pady=3)
+        self.winmx_remote_last_updated_var = tk.StringVar(value="N/A")
+        self.winmx_remote_updated_value = ttk.Label(self.winmx_patch_frame, textvariable=self.winmx_remote_last_updated_var, font=("Segoe UI", 9, "italic"), foreground="gray")
+        self.winmx_remote_updated_value.grid(row=3, column=1, sticky="w", padx=5, pady=3)
+        ToolTip(self.winmx_remote_updated_value, lambda: "Last modification date of the file on the remote server. 'N/A' may mean the server doesn't provide this info.")
 
         # Log output
         log_frame = ttk.LabelFrame(manager_tab, text="Log", padding="10")
@@ -400,6 +422,7 @@ class P2PHelperApp(tk.Tk):
         self._create_downloads_tab_widgets(downloads_tab)
 
     CLIENT_DOWNLOADS = {
+        "BearShare": "https://drive.google.com/drive/folders/1EWyiP_d9drmVTv5vMQuj2t_Kn6muhebv?usp=drive_link",
         "Cabos": "https://drive.google.com/drive/folders/1W0w4437xqS9E-ePTVM-xnJGlL_sOzof_?usp=sharing",
         "DexterWire": "https://drive.google.com/drive/folders/1JkUdMU5UdRYYxwo8TpBtBOEmCycyritz?usp=sharing",
             "FileNavigator": "https://drive.google.com/drive/folders/1jJPC8ycS-9Lw6JkMTNLacWXY3BIUFLG-?usp=drive_link",
@@ -806,6 +829,8 @@ class P2PHelperApp(tk.Tk):
         self.installed_programs = sorted(final_programs, key=lambda x: x["DisplayName"].lower())
         self.after(0, self._update_program_list_ui)
         self.after(0, self.log_message, f"Scan complete. Found {len(programs_found)} new programs.")
+        # After a scan, check again for the BearShare Test warning in case it was just found.
+        self.after(0, self.show_bearshare_test_warning)
         self.after(0, self.save_settings) # Save the updated list
 
     def _load_icon(self, icon_path, size=(16, 16)):
@@ -1025,12 +1050,18 @@ class P2PHelperApp(tk.Tk):
         self.exe_path_var.set(program_info.get("ExecutablePath", ""))
         self.install_location_var.set(program_info.get("InstallLocation", ""))      
         self.last_updated_var.set(program_info.get("LastUpdated", "N/A"))
+        self.remote_last_updated_var.set("Checking...")
         self.nodes_list_url_var.set(program_info.get("NodesListURL", ""))
         self.nodes_list_target_var.set(program_info.get("NodesListTargetPath", ""))
         self.nodes_last_updated_var.set(program_info.get("NodesLastUpdated", "N/A"))
+        self.nodes_remote_last_updated_var.set("Checking...")
         self.winmx_patch_url_var.set(program_info.get("WinMXPatchURL", ""))
         self.winmx_patch_target_var.set(program_info.get("WinMXPatchTarget", ""))
         self.winmx_patch_last_updated_var.set(program_info.get("WinMXPatchLastUpdated", "N/A"))
+        self.winmx_remote_last_updated_var.set("Checking...")
+
+        self._fetch_remote_update_times(program_info)
+
         is_edonkey_network = program_info.get("Network") == "eDonkey/Kadmille"
         
         # Show/Hide the Kademlia (nodes.dat) frame within the Server List tab
@@ -1096,7 +1127,7 @@ class P2PHelperApp(tk.Tk):
             if is_edonkey_network:
                 combined_lists = {**self.EDONKEY_SERVER_LISTS, **network_custom_lists}
                 available_urls = list(combined_lists.keys())
-                url_combo.bind("<<ComboboxSelected>>", lambda e, v=url_var: self.on_edonkey_server_select(e, v))
+                url_combo.bind("<<ComboboxSelected>>", lambda e, v=url_var: self._on_server_url_select(v))
                 # Set friendly name if URL matches either a default or custom list
                 for name, url_val in combined_lists.items():
                     if url == url_val:
@@ -1104,6 +1135,7 @@ class P2PHelperApp(tk.Tk):
                         break
             else:
                 available_urls = list(network_custom_lists.keys())
+                url_combo.bind("<<ComboboxSelected>>", lambda e, v=url_var: self._on_server_url_select(v))
 
             # Ensure the current URL (or its friendly name) is in the list of values
             if url_var.get() not in available_urls:
@@ -1242,12 +1274,15 @@ class P2PHelperApp(tk.Tk):
         self.nodes_frame.grid_remove() # Hide nodes frame
         self.winmx_patch_frame.grid_remove() # Hide WinMX patch frame
         self.last_updated_var.set("N/A")
+        self.remote_last_updated_var.set("N/A")
         self.nodes_list_url_var.set("")
         self.nodes_list_target_var.set("")
         self.nodes_last_updated_var.set("N/A")
+        self.nodes_remote_last_updated_var.set("N/A")
         self.winmx_patch_url_var.set("")
         self.winmx_patch_target_var.set("")
         self.winmx_patch_last_updated_var.set("N/A")
+        self.winmx_remote_last_updated_var.set("N/A")
         self.download_server_list_button.config(state=tk.DISABLED)
         self.nodes_list_url_combo.config(state=tk.DISABLED)
         self.browse_exe_button.config(state=tk.DISABLED)
@@ -1289,12 +1324,25 @@ class P2PHelperApp(tk.Tk):
         else:
             self.download_nodes_list_button.config(state=tk.DISABLED)
 
-    def on_edonkey_server_select(self, event, url_var):
-        """Handles selection from the eDonkey server list combobox."""
-        # Do nothing here. The friendly name should remain in the combobox.
-        # The URL resolution will happen during save or download.
-        pass
+    def _on_server_url_select(self, url_var):
+        """
+        Handles selection from any server list combobox to re-fetch the remote update time.
+        """
+        if not self.selected_program:
+            return
 
+        url_or_name = url_var.get()
+        network = self.selected_program.get("Network")
+        network_custom_lists = self._get_custom_lists_for_network(network)
+        
+        # Check all relevant lists for a friendly name match
+        combined_lists = {**self.EDONKEY_SERVER_LISTS, **network_custom_lists}
+        
+        url_to_check = combined_lists.get(url_or_name, url_or_name)
+
+        self.remote_last_updated_var.set("Checking...")
+        threading.Thread(target=self._get_last_modified, args=(url_to_check, self.remote_last_updated_var), daemon=True).start()
+        
     def on_winmx_patch_change(self, *args):
         is_active = self.winmx_patch_target_entry.cget("state") != tk.DISABLED
         has_url = self.winmx_patch_url_var.get()
@@ -1838,7 +1886,7 @@ class P2PHelperApp(tk.Tk):
             if client_type == "edonkey2000":
                 target_path = os.path.join(install_location, "server.met")
                 program_info["ServerListTargetPaths"] = {
-                    self.EDONKEY_SERVER_LISTS["GitHub Backup (ShortyPower)"]: [target_path]
+                    self.EDONKEY_SERVER_LISTS["eMule Security"]: [target_path]
                 }
             elif client_type == "emule":
                 target_path = os.path.join(install_location, "config", "server.met")
@@ -1908,7 +1956,7 @@ class P2PHelperApp(tk.Tk):
 
         # Auto-detect from display name if type isn't specified
         if not client_type:
-            for kw in ["morpheus ultra", "morpheus", "gnucleus", "mynapster", "phex", "xolox", "kceasy", "neonapster"]:
+            for kw in ["morpheus ultra", "morpheus", "gnucleus", "mynapster", "phex", "xolox", "kceasy", "neonapster", "bearshare"]:
                 if kw in display_name:
                     client_type = kw.replace(" ", "_") # e.g., "morpheus ultra" -> "morpheus_ultra"
 
@@ -2055,6 +2103,37 @@ class P2PHelperApp(tk.Tk):
                 "https://raw.githubusercontent.com/GamerA1-99/KCeasy/Gnutella/gwebcaches": [os.path.join(conf_dir, "gwebcaches")],
                 "https://raw.githubusercontent.com/GamerA1-99/KCeasy/Gnutella/nodes": [os.path.join(conf_dir, "nodes")],
             }
+
+        elif client_type == "bearshare":
+            is_test_version = "test" in display_name
+            # Override paths for BearShare to ensure correctness.
+            if program_info.get("Source") == "Registry":
+                program_files_x86 = os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")
+                # The installer might create "BearShare" or "BearShare Test"
+                install_path_base = "BearShare Test" if is_test_version else "BearShare"
+                install_path = os.path.join(program_files_x86, install_path_base)
+                exe_path = os.path.join(install_path, "BearShare.exe")
+                program_info["InstallLocation"] = install_path
+                program_info["ExecutablePath"] = exe_path
+
+            install_path = program_info.get("InstallLocation", "")
+            db_dir = os.path.join(install_path, "db")
+            base_url = "https://raw.githubusercontent.com/GamerA1-99/BearShare-Hosts-File/main/"
+
+            if is_test_version:
+                # BearShare Test uses a smaller set of files
+                program_info["ServerListTargetPaths"] = {
+                    base_url + "connect.txt": [os.path.join(db_dir, "connect.txt")],
+                    base_url + "gwebcache.dat": [os.path.join(db_dir, "gwebcache.dat")],
+                }
+            else:
+                # Regular BearShare uses four files
+                program_info["ServerListTargetPaths"] = {
+                    base_url + "connect.dat": [os.path.join(db_dir, "connect.dat")],
+                    base_url + "connect.txt": [os.path.join(db_dir, "connect.txt")],
+                    base_url + "gnucache.dat": [os.path.join(db_dir, "gnucache.dat")],
+                    base_url + "gwebcache.dat": [os.path.join(db_dir, "gwebcache.dat")],
+                }
 
     def toggle_edit_mode(self):
         self.is_editing = not self.is_editing
@@ -2701,6 +2780,97 @@ class P2PHelperApp(tk.Tk):
                 self.after(0, messagebox.showerror, "Download Error", f"An unexpected error occurred:\n{e}")
             raise e # Re-raise for multi-download to catch
 
+    def _fetch_remote_update_times(self, program_info):
+        """Starts threads to fetch the Last-Modified headers for relevant URLs."""
+        # For server lists (multi-source)
+        target_sources = program_info.get("ServerListTargetPaths", {})
+        if target_sources:
+            # We check the first URL. In most cases, all files in a multi-source set are updated together.
+            first_url = next(iter(target_sources), None)
+            if first_url:
+                threading.Thread(target=self._get_last_modified, args=(first_url, self.remote_last_updated_var), daemon=True).start()
+        else:
+            self.remote_last_updated_var.set("N/A")
+
+        # For nodes.dat
+        nodes_url_or_name = program_info.get("NodesListURL")
+        if nodes_url_or_name:
+            nodes_url = self.EMULE_NODES_LISTS.get(nodes_url_or_name, nodes_url_or_name)
+            threading.Thread(target=self._get_last_modified, args=(nodes_url, self.nodes_remote_last_updated_var), daemon=True).start()
+        else:
+            self.nodes_remote_last_updated_var.set("N/A")
+
+        # For WinMX patch
+        winmx_url = program_info.get("WinMXPatchURL")
+        if winmx_url:
+            threading.Thread(target=self._get_last_modified, args=(winmx_url, self.winmx_remote_last_updated_var), daemon=True).start()
+        else:
+            self.winmx_remote_last_updated_var.set("N/A")
+
+    def _get_last_modified(self, url, result_var):
+        """Worker thread to get the Last-Modified header from a URL."""
+        try:
+            # Use the GitHub API for raw.githubusercontent.com URLs for accurate timestamps
+            if 'raw.githubusercontent.com' in url:
+                self._get_github_last_modified(url, result_var)
+                return
+
+            # Do not attempt to make a web request for local file URIs.
+            if url.startswith('file:'):
+                self.after(0, result_var.set, "N/A")
+                return
+
+            req = urllib.request.Request(url, method='HEAD')
+            with urllib.request.urlopen(req, timeout=10) as response:
+                # Only use 'Last-Modified'. The 'Date' header is often the current time and misleading.
+                last_modified = response.headers.get('Last-Modified')
+
+                if last_modified:
+                    # Try to parse the date and reformat it. If it fails for any reason, show N/A.
+                    try:
+                        dt = datetime.strptime(last_modified, '%a, %d %b %Y %H:%M:%S %Z')
+                        self.after(0, result_var.set, dt.strftime('%Y-%m-%d %H:%M'))
+                    except ValueError:
+                        self.after(0, result_var.set, "N/A") # If format is unexpected, just show N/A
+                else:
+                    self.after(0, result_var.set, "N/A")
+        except Exception:
+            self.after(0, result_var.set, "N/A")
+
+    def _get_github_last_modified(self, raw_url, result_var):
+        """Fetches the last commit date for a file from raw.githubusercontent.com using the GitHub API."""
+        try:
+            # Example raw_url: https://raw.githubusercontent.com/USER/REPO/BRANCH/PATH/TO/FILE.txt
+            parts = urllib.parse.urlparse(raw_url).path.split('/')
+            if len(parts) < 5:
+                self.after(0, result_var.set, "N/A")
+                return
+
+            user = parts[1]
+            repo = parts[2]
+            branch = parts[3]
+            file_path = '/'.join(parts[4:])
+
+            api_url = f"https://api.github.com/repos/{user}/{repo}/commits?path={file_path}&sha={branch}&per_page=1"
+
+            # GitHub API requires a User-Agent header
+            req = urllib.request.Request(api_url, headers={'User-Agent': 'P2P-Connection-Helper'})
+
+            with urllib.request.urlopen(req, timeout=10) as response:
+                data = json.load(response)
+                if data:
+                    # Date is in ISO 8601 format, e.g., "2023-10-27T18:30:00Z"
+                    commit_date_str = data[0]['commit']['committer']['date']
+                    # Parse ISO 8601 format and convert to local time for display
+                    dt_utc = datetime.fromisoformat(commit_date_str.replace('Z', '+00:00'))
+                    dt_local = dt_utc.astimezone(None)
+                    self.after(0, result_var.set, dt_local.strftime('%Y-%m-%d %H:%M'))
+                else:
+                    self.after(0, result_var.set, "N/A")
+        except Exception:
+            # If API fails for any reason, fall back to N/A
+            self.after(0, result_var.set, "N/A")
+
     def _on_multi_download_complete(self, success_count, fail_count, total_count):
         """Updates UI after a multi-target download is finished."""
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -2928,6 +3098,7 @@ A peer-to-peer (P2P) network is a system where individual computers (peers) conn
             "DexterWire": "A Gnutella client based on the LimeWire source code.", # No star here
             "FileNavigator": "A client for the OpenNapster network that uses a .reg file to import server lists, similar to Napigator.",
             "Swaptor": "A client for the OpenNapster network, based on FileNavigator. It uses a .reg file to import server lists.",
+            "BearShare": "A classic client that connects to the Gnutella2 (G2) network.",
             "KCeasy": "A multi-network client that uses the giFT backend. It can connect to the Gnutella and Gnutella2 (G2) networks. While it previously supported other networks like Ares and OpenFT, these are no longer functional.",
             "FrostWire": "A popular Gnutella client, originally a fork of LimeWire.",
             "LimeWire": "One of the most well-known Gnutella clients.",
@@ -3054,6 +3225,56 @@ A utility to help manage and update server lists for legacy P2P applications.
         x = self.winfo_x() + (self.winfo_width() // 2) - (dialog.winfo_width() // 2)
         y = self.winfo_y() + (self.winfo_height() // 2) - (dialog.winfo_height() // 2)
         dialog.geometry(f"+{x}+{y}")
+
+    def show_bearshare_test_warning(self):
+        """Shows a startup warning if BearShare Test is detected."""
+        if not self.settings.get("show_bearshare_test_warning", True):
+            return
+
+        is_bst_present = any(
+            'bearshare test' in p.get("DisplayName", "").lower()
+            for p in self.installed_programs
+        )
+
+        if not is_bst_present:
+            return
+
+        dialog = tk.Toplevel(self)
+        dialog.title("Important: BearShare Test Detected")
+        dialog.transient(self)
+        dialog.grab_set()
+        dialog.resizable(False, False)
+
+        try:
+            icon_path = os.path.join(self.script_dir, "p2p.ico")
+            if os.path.exists(icon_path):
+                dialog.iconbitmap(icon_path)
+        except Exception:
+            pass
+
+        frame = ttk.Frame(dialog, padding="20")
+        frame.pack(fill=tk.BOTH, expand=True)
+
+        warning_text = (
+            "You have 'BearShare Test' in your program list. This is an old beta version with an expiration date and will not run normally.\n\n"
+            "To use it, you must run it with a tool like **RunAsDate**.\n\n"
+            "Set the date and time in RunAsDate to:\n"
+            "**25.07.2005 at 12:00**\n\n"
+            "You can also have RunAsDate create a desktop shortcut and then point the 'Executable Path' for BearShare Test in this program to that new shortcut file."
+        )
+        ttk.Label(frame, text=warning_text, justify=tk.LEFT, wraplength=450).pack(pady=(0, 15))
+
+        dont_show_var = tk.BooleanVar()
+        ttk.Checkbutton(frame, text="Do not show this message again", variable=dont_show_var).pack(anchor='w', pady=(0, 10))
+
+        def on_ok():
+            if dont_show_var.get():
+                self.settings["show_bearshare_test_warning"] = False
+                self.save_settings()
+            dialog.destroy()
+
+        ok_button = ttk.Button(frame, text="OK", command=on_ok)
+        ok_button.pack()
 
 def is_admin():
     """Check if the script is running with administrator privileges."""
