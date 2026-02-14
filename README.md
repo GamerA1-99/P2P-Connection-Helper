@@ -6,7 +6,7 @@ A tool to get old unsupported/defunct P2P clients back online
 
 A Windows utility designed to help manage and maintain legacy peer-to-peer (P2P) file-sharing applications. Many of these classic programs rely on server lists, host caches, or network patches to connect, and this tool automates the process of keeping them updated.
 
-### **Latest version can be downloaded here:** [P2P Connection Helper - v1.0](https://github.com/GamerA1-99/P2P-Connection-Helper/releases/tag/v-1-0)
+### **Latest version can be downloaded here:** [P2P Connection Helper - v1.1](https://github.com/GamerA1-99/P2P-Connection-Helper/releases/tag/v-1-1)
 
 ---
 
