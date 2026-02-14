@@ -32,6 +32,7 @@ The creator of this program is not responsible for the user's actions or the con
     *   **OpenNapster**: Manages `.wsx` server lists and can import `.reg` files for clients like Napster, Napigator, WinMX, Xnap and FileNavigator.
 *   **Client & Server Downloads**: A curated tab with verified links to download installers for dozens of classic P2P clients and server applications.
 *   **Link Testing**: Test the status of server list URLs and download links to ensure they are active.
+*   **File Date Check**: Check activily when the file was last updated on the hosted website (url) and compare them to the latest updated files on the computer locally to see if it's up to date.
 *   **Centralized Launcher**: Launch your configured P2P programs directly from the application.
 *   **Configuration**: All settings, including manually added programs and custom URLs, are saved in a local `p2p_helper_settings.json` file.
 
