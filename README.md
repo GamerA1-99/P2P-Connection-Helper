@@ -48,7 +48,7 @@ This tool is pre-configured to assist clients on the following networks:
 
 ## Requirements
 
-*   **For running from .exe**: OS: Windows 10 or 11 64-Bit (may also work with older Windows OS like: Windows 8.1/8/7/Vista and XP 64-bit, as long it is 64 bit version, but cannot guarenteed anything except 11 and 10) (The application relies on the Windows Registry and UAC elevation).
+*   **For running from .exe**: OS: Windows 10 or 11 64-Bit (may also work with older Windows OS like: Windows 8.1/8/7/Vista, as long it is the 64 bit version, but cannot guarenteed anything except 10 and 11), (The application relies on the Windows Registry and UAC elevation).
 *   **For running from source**: Python 3.6+ and the `Pillow` library are required.
 
 ## Usage
