@@ -37,26 +37,20 @@ class ToolTip:
         self.id = None
         self.x = self.y = 0
         self.widget.bind("<Enter>", self.enter)
-        self.widget.bind("<Leave>", self.leave)
+        self.widget.bind("<Leave>", self.on_leave)
         self.widget.bind("<ButtonPress>", self.leave) # Hide on click
-        self.widget.bind("<Motion>", self.on_motion) # Hide if mouse moves away
 
     def enter(self, event=None):
         self.schedule()
 
+    def on_leave(self, event=None):
+        # This is called when the mouse leaves the widget.
+        # We unschedule any pending 'showtip' and hide any visible tip.
+        self.leave()
+
     def leave(self, event=None):
         self.unschedule()
         self.hidetip()
-
-    def on_motion(self, event=None):
-        # If the tooltip is visible, check if the mouse is still over the widget
-        if self.tip_window:
-            # Get the widget's current screen coordinates
-            x, y, w, h = self.widget.winfo_rootx(), self.widget.winfo_rooty(), self.widget.winfo_width(), self.widget.winfo_height()
-            # Get the mouse's current screen coordinates
-            mx, my = self.widget.winfo_pointerxy()
-            if not (x <= mx <= x + w and y <= my <= y + h):
-                self.leave()
 
     def schedule(self):
         self.unschedule()
@@ -87,6 +81,8 @@ class ToolTip:
                          background="#ffffe0", relief=tk.SOLID, borderwidth=1,
                          font=("tahoma", "8", "normal"))
         label.pack(ipadx=1)
+        # Start a recurring check to hide the tip if the mouse moves away.
+        self.widget.after(100, self.check_mouse_position)
 
     def hidetip(self):
         tw = self.tip_window
@@ -94,6 +90,23 @@ class ToolTip:
         if tw:
             tw.destroy()
 
+    def check_mouse_position(self):
+        """
+        Recursively checks if the mouse is still over the widget. If not,
+        hides the tooltip. This is more reliable than relying on <Motion> events.
+        """
+        if not self.tip_window:
+            return # Stop checking if the tip is already hidden
+
+        # Get the widget's current screen coordinates and mouse position
+        x, y, w, h = self.widget.winfo_rootx(), self.widget.winfo_rooty(), self.widget.winfo_width(), self.widget.winfo_height()
+        mx, my = self.widget.winfo_pointerxy()
+
+        if not (x <= mx <= x + w and y <= my <= y + h):
+            self.leave()
+        else:
+            # If the mouse is still over, schedule another check
+            self.widget.after(100, self.check_mouse_position)
 
 class P2PHelperApp(tk.Tk):
     VERSION: str = "1.1"
