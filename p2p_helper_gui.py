@@ -152,8 +152,8 @@ class P2PHelperApp(tk.Tk):
         self.P2P_NETWORKS = {
             "Gnutella": ["limewire", "frostwire", "wireshare", "gnutella", "xnap", "luckywire", "lemonwire", "turbowire", "cabos", "dexterwire"],
             "eDonkey/Kadmille": ["edonkey", "emule", "amule", "edonkey2000", "lphant"],
-            "GnuCDNA/Gnutella2": ["gnucleus", "morpheus", "morpheus ultra", "mynapster", "phex", "gnutella2", "xolox", "kceasy", "neonapster", "bearshare"],
-            "OpenNapster": ["napster", "napigator", "opennap", "filenavigator", "swaptor"],
+            "GnuCDNA/Gnutella2": ["gnucleus", "morpheus ultra", "morpheus", "mynapster", "phex", "gnutella2", "xolox", "kceasy", "neonapster", "bearshare"],
+            "OpenNapster": ["napigator", "filenavigator", "swaptor", "napster", "opennap"],
             "WinMX": ["winmx", "winmx community patch"],
             "Unknown": []  # Fallback for manually added programs
         }
@@ -1637,7 +1637,7 @@ class P2PHelperApp(tk.Tk):
 
         # Auto-detect from display name if type isn't specified
         if not client_type:
-            if "napigator" in display_name:
+            if "napigator" in display_name: # Napigator is most specific
                 client_type = "napigator"
             elif "filenavigator" in display_name:
                 client_type = "filenavigator"
@@ -1854,14 +1854,15 @@ class P2PHelperApp(tk.Tk):
         
         # Specifically clear server info for clients like xNap that don't use a server list.
         # This should not affect other clients that might be in the Gnutella family but have their own logic (like Morpheus).
-        if "xnap" in display_name:
+        if "xnap" in display_name.lower():
             # The registry path for XNap can be unreliable, so we set it here for consistency.
-            if program_info.get("Source") == "Registry" or "xnap" in program_info.get("MatchedKeyword", ""):
+            if program_info.get("Source") == "Registry":
                 program_files_x86 = os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")
                 install_path = os.path.join(program_files_x86, "XNap")
                 exe_path = os.path.join(install_path, "xnap.jar")
                 program_info["InstallLocation"] = install_path
                 program_info["ExecutablePath"] = exe_path
+
             # Add the .wsx server list for the OpenNapster network.
             # This file must be manually imported, so we add it as a source
             # with an empty target list, allowing the user to add a save location.
@@ -1967,31 +1968,35 @@ class P2PHelperApp(tk.Tk):
         if not app_data_path:
             return
 
+        # Standardize client_type to use underscores (e.g., "morpheus ultra" -> "morpheus_ultra")
+        # This ensures consistency whether called from registry scan or manual add.
+        if client_type:
+            client_type = client_type.replace(" ", "_")
+
         # Auto-detect from display name if type isn't specified
         if not client_type:
-            for kw in ["morpheus ultra", "morpheus", "gnucleus", "mynapster", "phex", "xolox", "kceasy", "neonapster", "bearshare"]:
+            for kw in ["morpheus ultra", "morpheus", "gnucleus", "mynapster", "phex", "xolox", "kceasy", "neonapster", "bearshare", "bearshare test"]:
                 if kw in display_name:
                     client_type = kw.replace(" ", "_") # e.g., "morpheus ultra" -> "morpheus_ultra"
+                    break # Stop after the first match to ensure "morpheus ultra" is prioritized
 
         if client_type == "morpheus_ultra":
             # Morpheus Ultra has multiple, distinct server files.
-            # We will store these as a dictionary of {url: [target_paths]}
-            # The UI will show "Multiple Sources" and the download logic will handle it.
+            # The base URL for the raw files on GitHub.
             base_url = "https://raw.githubusercontent.com/GamerA1-99/GnucDNA/Morpheus-Ultra/"
-            morpheus_ultra_dir = os.path.join(app_data_path, "Morpheus Ultra")
             morpheus_dir = os.path.join(app_data_path, "Morpheus")
-            program_info["ServerListURL"] = "Multiple Sources" # Special value for UI
             program_info["ServerListTargetPaths"] = {
-                base_url + "MorphBlocked.net": [os.path.join(morpheus_ultra_dir, "MorphBlocked.net"),
-                                               os.path.join(morpheus_dir, "MorphBlocked.net")],
-                base_url + "MorphCache.net": [os.path.join(morpheus_ultra_dir, "MorphCache.net"),
-                                             os.path.join(morpheus_dir, "MorphCache.net")],
-                base_url + "MorphUltraCache.net": [os.path.join(morpheus_ultra_dir, "MorphUltraCache.net"),
-                                                  os.path.join(morpheus_dir, "MorphUltraCache.net")],
-                base_url + "WebCache.net": [os.path.join(morpheus_ultra_dir, "WebCache.net"),
-                                           os.path.join(morpheus_dir, "WebCache.net")],
+                base_url + "MorphBlocked.net": [os.path.join(morpheus_dir, "MorphBlocked.net")],
+                base_url + "MorphCache.net": [os.path.join(morpheus_dir, "MorphCache.net")],
+                base_url + "MorphUltraCache.net": [os.path.join(morpheus_dir, "MorphUltraCache.net")],
+                base_url + "WebCache.net": [os.path.join(morpheus_dir, "WebCache.net")],
             }
+            program_info["ServerListURL"] = "Multiple Sources" # Special value for UI
             program_info["ServerListType"] = "multi"
+            # Also set the icon path if it exists
+            icon_filename = "Morpheus.ico"
+            if os.path.exists(os.path.join(self.script_dir, icon_filename)):
+                program_info["IconPath"] = icon_filename
         elif client_type == "morpheus":
             # Override paths for standard Morpheus to ensure correctness, as registry can be unreliable.
             if program_info.get("Source") == "Registry":
@@ -2118,7 +2123,7 @@ class P2PHelperApp(tk.Tk):
             }
 
         elif client_type == "bearshare":
-            is_test_version = "test" in display_name
+            is_test_version = "test" in display_name or client_type == "bearshare_test"
             # Override paths for BearShare to ensure correctness.
             if program_info.get("Source") == "Registry":
                 program_files_x86 = os.environ.get("ProgramFiles(x86)", "C:\\Program Files (x86)")
@@ -2862,9 +2867,11 @@ class P2PHelperApp(tk.Tk):
             user = parts[1]
             repo = parts[2]
             branch = parts[3]
-            file_path = '/'.join(parts[4:])
+            # The path from urlparse might be URL-encoded, so we decode it first.
+            file_path = urllib.parse.unquote('/'.join(parts[4:]))
 
-            api_url = f"https://api.github.com/repos/{user}/{repo}/commits?path={file_path}&sha={branch}&per_page=1"
+            # URL-encode the file_path to handle special characters like spaces
+            api_url = f"https://api.github.com/repos/{user}/{repo}/commits?path={urllib.parse.quote(file_path)}&sha={branch}&per_page=1"
 
             # GitHub API requires a User-Agent header
             req = urllib.request.Request(api_url, headers={'User-Agent': 'P2P-Connection-Helper'})
