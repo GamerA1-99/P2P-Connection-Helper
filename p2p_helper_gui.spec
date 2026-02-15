@@ -9,6 +9,7 @@ block_cipher = None
 icon_files = [
     ('p2p.ico', '.'),
     ('Cabos.ico', '.'),
+	('bearshare.ico', '.'),
     ('DexterWire.ico', '.'),
     ('eDonkey.ico', '.'),
     ('eMule.ico', '.'),
